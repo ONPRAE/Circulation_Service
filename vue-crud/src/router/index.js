@@ -52,6 +52,11 @@ const router = createRouter({
         { path: '', component: () => import('../views/ProfileView.vue') } // หน้า CreateProduct
       ]
     },
+    {
+      path: '/products/:id',
+      name: 'about',
+      component: () => import('../views/UpdateProductView.vue')
+    },
   ]
 })
 

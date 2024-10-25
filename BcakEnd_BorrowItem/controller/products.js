@@ -62,62 +62,62 @@ const createProduct = async (req, res) => {
     }
 };
 
-// update one product
+// Update one product
 const updateProduct = async (req, res) => {
     try {
-        // Extracting the product ID from request parameters and validating it
+        // Extract the product ID from request parameters and validate it
         const product_id = parseInt(req.params.product_id, 10);
         if (isNaN(product_id)) {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        // Handling the image upload (assuming req.file contains the uploaded file)
-        const imagePath = req.file ? req.file.filename : null; // Ensure it's a string or null
+        // Retrieve the existing product data
+        const existingProduct = await prisma.products.findUnique({
+            where: { product_id },
+        });
 
-        // Extracting other fields from the request body and ensuring they're valid
-        const { productname, stock } = req.body;
-
-        if (!productname || !stock) {
-            return res.status(400).json({ message: 'Product name and stock are required' });
+        // Check if the product exists
+        if (!existingProduct) {
+            return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Updating the product in the database
-        const updatedProduct = await prismaClient.products.update({
-            where: {
-                product_id: product_id, // Make sure product_id is a valid number
-            },
+        // Handle image upload (if a new image file is provided)
+        const imagePath = req.file ? req.file.filename : existingProduct.image;
+
+        // Extract fields from the request body and use existing values if not provided
+        const { productname = existingProduct.productname, stock = existingProduct.stock } = req.body;
+
+        // Update the product in the database
+        const updatedProduct = await prisma.products.update({
+            where: { product_id },
             data: {
-                productname: productname,
-                stock: parseInt(stock, 10), // Convert stock to integer
-                image: imagePath, // Must be a string (file path or URL) or null
+                productname,
+                stock: parseInt(stock, 10), // Ensure stock is an integer
+                image: imagePath, // Keep existing image if no new file is provided
             },
         });
 
-        // Respond with success message and the updated product
+        // Respond with success message and the updated product data
         res.status(200).json({
             message: 'Product updated successfully',
             product: updatedProduct,
         });
     } catch (error) {
-        // Catching and responding with any errors
+        // Log and respond with any errors
         console.error('Error updating product:', error);
         res.status(500).json({ message: 'Failed to update product', error: error.message });
     }
 };
 
-// delete product by product_id
+// Delete product by product_id
 const deleteProduct = async (req, res) => {
-    const id = req.params.id; // ดึง ID จากพารามิเตอร์ URL
+    const id = req.params.id;
 
     try {
-        // ตรวจสอบว่าผลิตภัณฑ์มีอยู่หรือไม่
         const existingProduct = await prisma.products.findUnique({
-            where: {
-                product_id: Number(id),
-            },
+            where: { product_id: Number(id) },
         });
 
-        // ถ้าไม่พบผลิตภัณฑ์
         if (!existingProduct) {
             return res.status(404).json({
                 status: 'error',
@@ -125,32 +125,55 @@ const deleteProduct = async (req, res) => {
             });
         }
 
-        // ลบผลิตภัณฑ์
         await prisma.products.delete({
-            where: {
-                product_id: Number(id),
-            },
+            where: { product_id: Number(id) },
         });
 
-        // ส่งข้อความเมื่อทำการลบสำเร็จ
         res.status(200).json({
             status: "ok",
-            message: `Product with ID = ${id} is deleted` // แสดง ID ที่ถูกลบ
+            message: `Product with ID = ${id} is deleted`
         });
     } catch (err) {
-        console.error('Delete product error: ', err); // แสดงข้อผิดพลาดใน console
+        console.error('Delete product error:', err);
         res.status(500).json({
             status: 'error',
             message: 'An unexpected error occurred.'
-        }); // ส่งข้อความข้อผิดพลาดกลับไปที่ client
+        });
     }
 };
 
-// get all Products 
+// Get all Products 
 const getProducts = async (req, res) => {
-    const pros = await prisma.products.findMany()
-    res.json(pros)
+    try {
+        const pros = await prisma.products.findMany();
+        res.json(pros);
+    } catch (err) {
+        console.error('Failed to retrieve products:', err.message);
+        res.status(500).json({ error: 'Failed to retrieve products' });
+    }
+};
+const getProductById = async (req, res) => {
+    const product_id = parseInt(req.params.id, 10); // Ensure product ID is an integer
+
+    if (isNaN(product_id)) {
+        return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
+    try {
+        const product = await prisma.products.findUnique({
+            where: { product_id },
+        });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        res.status(200).json(product);
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        res.status(500).json({ message: 'Failed to retrieve product', error: error.message });
+    }
 };
 
-// Export the upload middleware and createProduct function
-module.exports = { uploadimg, createProduct, updateProduct, deleteProduct, getProducts };
+// Export getProductById with other exports
+module.exports = { uploadimg, createProduct, updateProduct, deleteProduct, getProducts, getProductById };

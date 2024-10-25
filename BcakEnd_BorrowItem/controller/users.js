@@ -2,6 +2,10 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
+const hashPassword = async (password) => {
+  const saltRounds = 10; // Number of rounds for hashing
+  return await bcrypt.hash(password, saltRounds);
+};
 
 // Get all User
 const getUser = async (req, res) => {
@@ -9,36 +13,33 @@ const getUser = async (req, res) => {
   res.json(users);
 };
 
-//create users
 const createUser = async (req, res) => {
-    const { first_name, last_name, email, password, user_role } = req.body;
-  
-    //Hash the password
-    const hashResult = await bcrypt.hash(password, 5);
-    //256 = salt (การสุ่มค่าเพื่อเพิ่มความซับซ้อนในการเข้ารหัส)
-  
-    // Store the user data
-    const userData = {
+  const { first_name, last_name, email, password, role } = req.body;
+
+  try {
+    // Ensure password is hashed before saving
+    const hashedPassword = await hashPassword(password); // Implement this function to hash the password
+
+    const user = await prisma.user.create({
+      data: {
         first_name,
         last_name,
         email,
-        password: hashResult, // ใช้รหัสผ่านที่เข้ารหัสแล้ว
-        role: user_role || 'user'
-    };
-  
-    try {
-        const user = await prisma.user.create({
-            data: userData
-        });
-        res.status(201).json({ message: 'User created successfully', user });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Failed to insert user data!",
-            error: error.message,
-        });
-    }
+        password: hashedPassword, // Save the hashed password
+        role // This should be the string like "Admin" or "User"
+      }
+    });
+
+    res.status(201).json({ message: "User created successfully", user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error creating user" });
+  }
 };
+
+
+
+
 
 // Delete user
 const deleteUser = async (req, res) => {

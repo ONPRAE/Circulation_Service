@@ -13,6 +13,7 @@ router.put('/products/:product_id', productController.updateProduct);
 
 router.delete('/products/:id', productController.deleteProduct);
 router.get('/products', productController.getProducts);
+router.get('/products/:id', productController.getProductById);
 
 router.get('/borrows', borrowController.getBorrow);
 router.post('/borrows', borrowController.createBorrow);
