@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model borrow {
+  borrow_id     Int            @id @default(autoincrement())
+  user_id       Int
+  borrow_date   DateTime?      @db.DateTime(0)
+  borrow_period Bytes?         @db.Blob
+  status        borrow_status?
+
+  @@index([user_id], map: "users_ibfk_1")
+}
+
+model borrowdetail {
+  borrow_id  Int
+  product_id Int
+  amount     Int
+
+  @@id([borrow_id, product_id])
+  @@index([product_id], map: "product_id")
+}
+
+model products {
+  product_id  Int     @id @default(autoincrement())
+  productname String? @db.VarChar(100)
+  stock       Int?
+  image       String? @db.VarChar(100)
+}
+
+model user {
+  user_id    Int    @id @default(autoincrement())
+  first_name String @db.VarChar(100)
+  last_name  String @db.VarChar(100)
+  email      String @unique(map: "email") @db.VarChar(100)
+  password   String @db.VarChar(256)
+  role       String @db.VarChar(100)
+}
+
+enum borrow_status {
+  Borrowing
+  Return
+  Cancel
+  Late
+}

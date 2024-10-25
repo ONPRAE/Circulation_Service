@@ -1,0 +1,101 @@
+<template>
+  <div class="create-product">
+    <h1>Create Product</h1>
+    <form @submit.prevent="submitForm">
+      <div class="form-group">
+        <label for="productname">Product Name:</label>
+        <input type="text" v-model="productname" id="productname" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="stock">Stock:</label>
+        <input type="number" v-model="stock" id="stock" required min="1" />
+      </div>
+      
+      <div class="form-group">
+        <label for="image">Image:</label>
+        <input type="file" @change="onFileChange" accept="image/jpeg, image/png, image/gif" required />
+      </div>
+      
+      <button type="submit">Create Product</button>
+    </form>
+
+    <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+    <div v-if="successMessage" class="success">{{ successMessage }}</div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      productname: '',
+      stock: null,
+      image: null,
+      errorMessage: '',
+      successMessage: '',
+    };
+  },
+  methods: {
+    onFileChange(event) {
+      this.image = event.target.files[0];
+    },
+    async submitForm() {
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      if (!this.productname || !this.stock || !this.image) {
+        this.errorMessage = 'All fields are required.';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('productname', this.productname);
+      formData.append('stock', this.stock);
+      formData.append('image', this.image);
+
+      try {
+        const response = await axios.post('http://localhost:8800/api/v1/products', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        this.successMessage = response.data.message;
+        this.resetForm();
+      } catch (error) {
+        if (error.response && error.response.data) {
+          this.errorMessage = error.response.data.message || 'Failed to create product.';
+        } else {
+          this.errorMessage = 'An unexpected error occurred.';
+        }
+      }
+    },
+    resetForm() {
+      this.productname = '';
+      this.stock = null;
+      this.image = null;
+    },
+  },
+};
+</script>
+
+<style scoped>
+.create-product {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
+</style>
