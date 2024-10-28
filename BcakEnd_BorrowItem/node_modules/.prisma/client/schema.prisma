@@ -11,7 +11,7 @@ model borrow {
   borrow_id     Int            @id @default(autoincrement())
   user_id       Int
   borrow_date   DateTime?      @db.DateTime(0)
-  borrow_period Bytes?         @db.Blob
+  borrow_return DateTime?      @db.DateTime(0)
   status        borrow_status?
 
   @@index([user_id], map: "users_ibfk_1")
@@ -27,24 +27,41 @@ model borrowdetail {
 }
 
 model products {
-  product_id  Int     @id @default(autoincrement())
-  productname String? @db.VarChar(100)
-  stock       Int?
-  image       String? @db.VarChar(100)
+  product_id   Int                    @id @default(autoincrement())
+  product_name String?                @db.VarChar(100)
+  product_type products_product_type?
+  stock        Int?
+  image        String?                @db.VarChar(255)
 }
 
 model user {
-  user_id    Int    @id @default(autoincrement())
-  first_name String @db.VarChar(100)
-  last_name  String @db.VarChar(100)
-  email      String @unique(map: "email") @db.VarChar(100)
-  password   String @db.VarChar(256)
-  role       String @db.VarChar(100)
+  user_id    Int        @id @default(autoincrement())
+  first_name String     @db.VarChar(100)
+  last_name  String     @db.VarChar(100)
+  email      String     @unique(map: "email") @db.VarChar(100)
+  password   String     @db.VarChar(255)
+  role       user_role?
+}
+
+enum products_product_type {
+  ToolKids
+  Projector
+  Mouse
+  Laptop
+  Keyboard
+  Speaker
+  Monitor
 }
 
 enum borrow_status {
+  Pending
   Borrowing
   Return
   Cancel
   Late
+}
+
+enum user_role {
+  Admin
+  User
 }

@@ -53,9 +53,11 @@ const router = createRouter({
       ]
     },
     {
-      path: '/products/:id',
-      name: 'about',
-      component: () => import('../views/UpdateProductView.vue')
+      path: '/product',
+      component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/ProductView.vue') } // หน้า Home
+      ]
     },
   ]
 })

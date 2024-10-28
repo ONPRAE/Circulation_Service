@@ -68,7 +68,7 @@ const onSubmit = async () => {
     last_name: last_name.value,
     email: email.value,
     password: password.value,
-    role: 'user',
+    role: 'User',
   });
 
   const requestOptions = {
