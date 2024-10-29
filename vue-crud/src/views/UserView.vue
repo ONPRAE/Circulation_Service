@@ -92,7 +92,8 @@ const navigateToBorrowView = () => {
 // กำหนดข้อมูลคอลัมน์ของตาราง (ข้อมูลตัวอย่าง)
 const productColumns = ref([
   { name: 'product_id', align: 'center', label: 'Product ID', field: 'product_id', sortable: true },
-  { name: 'productname', align: 'left', label: 'Product Name', field: 'productname', sortable: true },
+  { name: 'product_name', align: 'left', label: 'Product Name', field: 'product_name', sortable: true },
+  { name: 'product_type', align: 'left', label: 'Product Type', field: 'product_type', sortable: true },
   { name: 'stock', align: 'right', label: 'Stock', field: 'stock', sortable: true },
   { name: 'actions', align: 'center', label: 'Actions', field: 'actions', sortable: false }, 
 ]);

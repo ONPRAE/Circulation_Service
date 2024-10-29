@@ -65,15 +65,8 @@ export default {
 
         // ตรวจสอบสถานะ login สำเร็จ
         if (response.status === 200) {
-          const userRole = response.data.role; // assuming role is in response data
-          
-          if (userRole === 'Admin' || userRole === 'admin') {
-  this.$router.push('/home');
-} else if (userRole === 'User' || userRole === 'user') {
-  this.$router.push('/about');
-} else {
-  alert('Unknown role. Please contact support.');
-}
+          this.$router.push('/home');
+
 
         }
       } catch (error) {
