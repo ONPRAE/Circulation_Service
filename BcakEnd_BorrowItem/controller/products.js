@@ -1,65 +1,63 @@
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, products_product_type } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// Set up multer for file uploads
+// Configure Multer for image uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'asset/picture/'); // Save the uploaded images in the 'uploads' folder
+        cb(null, 'uploads/'); // Save the uploaded images in the 'uploads' folder
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname)); // Rename the file with a timestamp
     }
 });
 
-// Filter to allow only image files
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error('Invalid file type, only JPEG, PNG, and GIF are allowed!'), false);
-    }
-};
+const upload = multer({ storage: storage }).single('image'); // For handling single image upload
 
-const uploadimg = multer({ storage: storage, fileFilter }).single('image'); // Ensure it's a single file upload
+// Insert one product with image upload
+const createProduct = (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error uploading file', error: err.message });
+        }
+        
+        const { product_name, product_type, stock } = req.body;
+        const image = req.file ? req.file.path : ''; // Save the image path if uploaded
 
-// Insert one product
-const createProduct = async (req, res) => {
-    const { productname, stock } = req.body;
-    const imageFile = req.file; // Get the uploaded file
+        // Validate product_type is within the enum values
+        if (product_type && !Object.values(products_product_type).includes(product_type)) {
+            return res.status(400).json({ message: 'Invalid product type' });
+        }
 
-    // Basic validation
-    if (!productname || !stock || !imageFile) {
-        return res.status(400).json({
-            status: "error",
-            message: "Product name, stock, and image file are required"
-        });
-    }
-
-    try {
-        const prod = await prisma.products.create({
-            data: {
-                productname,
-                stock: parseInt(stock, 10), // Ensure stock is an integer
-                image: imageFile.path // Store the path of the uploaded image
-            }
-        });
-        res.status(201).json({
-            status: "ok",
-            message: `Product with ID = ${prod.product_id} is created`
-        });
-    } catch (err) {
-        console.error("Error creating product:", err);
-        res.status(500).json({
-            status: "error",
-            message: "Failed to create product",
-            error: err.message // Provide more detail about the error
-        });
-    }
+        try {
+            // Create a new product with image URL
+            const prod = await prisma.products.create({
+                data: {
+                    product_name,
+                    product_type,
+                    stock: stock ? parseInt(stock, 10) : null,
+                    image
+                }
+            });
+    
+            // Send response on success
+            res.status(200).json({
+                status: "ok",
+                message: `Product with ID = ${prod.product_id} is created`,
+                product: prod
+            });
+        } catch (err) {
+            // Handle errors
+            res.status(500).json({
+                status: "error",
+                message: "Failed to create product",
+                error: err.message
+            });
+        }
+    });
 };
 
 // Update one product
@@ -82,18 +80,24 @@ const updateProduct = async (req, res) => {
         }
 
         // Handle image upload (if a new image file is provided)
-        const imagePath = req.file ? req.file.filename : existingProduct.image;
+        const imagePath = req.file ? req.file.path : existingProduct.image;
 
         // Extract fields from the request body and use existing values if not provided
-        const { productname = existingProduct.productname, stock = existingProduct.stock } = req.body;
+        const { product_name = existingProduct.product_name, product_type = existingProduct.product_type, stock = existingProduct.stock } = req.body;
+
+        // Validate product_type if provided in request
+        if (product_type && !Object.values(products_product_type).includes(product_type)) {
+            return res.status(400).json({ message: 'Invalid product type' });
+        }
 
         // Update the product in the database
         const updatedProduct = await prisma.products.update({
             where: { product_id },
             data: {
-                productname,
-                stock: parseInt(stock, 10), // Ensure stock is an integer
-                image: imagePath, // Keep existing image if no new file is provided
+                product_name,
+                product_type,
+                stock: stock ? parseInt(stock, 10) : null,
+                image: imagePath
             },
         });
 
@@ -152,6 +156,8 @@ const getProducts = async (req, res) => {
         res.status(500).json({ error: 'Failed to retrieve products' });
     }
 };
+
+// Get Product by ID
 const getProductById = async (req, res) => {
     const product_id = parseInt(req.params.id, 10); // Ensure product ID is an integer
 
@@ -175,5 +181,5 @@ const getProductById = async (req, res) => {
     }
 };
 
-// Export getProductById with other exports
-module.exports = { uploadimg, createProduct, updateProduct, deleteProduct, getProducts, getProductById };
+// Export the functions
+module.exports = { createProduct, updateProduct, deleteProduct, getProducts, getProductById };

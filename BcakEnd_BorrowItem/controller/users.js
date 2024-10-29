@@ -1,144 +1,130 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, user_role } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 const hashPassword = async (password) => {
-  const saltRounds = 10; // Number of rounds for hashing
-  return await bcrypt.hash(password, saltRounds);
+    const saltRounds = 10;
+    return await bcrypt.hash(password, saltRounds);
 };
 
-// Get all User
+// Get all Users
 const getUser = async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
+    try {
+        const users = await prisma.user.findMany();
+        res.json(users);
+    } catch (error) {
+        console.error('Failed to retrieve users:', error);
+        res.status(500).json({ error: 'Failed to retrieve users' });
+    }
 };
 
+// Create a new user
 const createUser = async (req, res) => {
-  const { first_name, last_name, email, password, role } = req.body;
+    const { first_name, last_name, email, password, role } = req.body;
 
-  try {
-    // Ensure password is hashed before saving
-    const hashedPassword = await hashPassword(password); // Implement this function to hash the password
+    // Validate role against the user_role enum
+    if (role && !Object.values(user_role).includes(role)) {
+        return res.status(400).json({ message: 'Invalid role specified.' });
+    }
 
-    const user = await prisma.user.create({
-      data: {
-        first_name,
-        last_name,
-        email,
-        password: hashedPassword, // Save the hashed password
-        role // This should be the string like "Admin" or "User"
-      }
-    });
+    try {
+        const hashedPassword = await hashPassword(password);
 
-    res.status(201).json({ message: "User created successfully", user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error creating user" });
-  }
+        const user = await prisma.user.create({
+            data: {
+                first_name,
+                last_name,
+                email,
+                password: hashedPassword,
+                role
+            }
+        });
+
+        res.status(201).json({ message: "User created successfully", user });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ error: "Error creating user" });
+    }
 };
-
-
-
-
 
 // Delete user
 const deleteUser = async (req, res) => {
-  const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
 
-  try {
-      // Check if the User exists
-      const existingUser = await prisma.user.findUnique({
-          where: {
-            user_id: Number(id),  // Ensure Use_id is a number
-          },
-      });
+    try {
+        const existingUser = await prisma.user.findUnique({
+            where: { user_id: id },
+        });
 
-      // If User not found
-      if (!existingUser) {
-          return res.status(404).json({ message: 'User not found' });
-      }
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-      // Delete the User
-      await prisma.user.delete({
-          where: {
-            user_id: Number(id),
-          },
-      });
+        await prisma.user.delete({
+            where: { user_id: id },
+        });
 
-      // Send a success message when deletion is successful
-      res.status(200).json({
-          status: "ok",
-          message: `User with ID = ${id} is deleted`  // Display the deleted ID
-      });
-  } catch (err) {
-      console.error('Delete User error: ', err);  // Log the error to the console
-      res.status(500).json({ error: err.message });  // Send error message back to client
-  }
+        res.status(200).json({ message: `User with ID = ${id} is deleted` });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ error: 'Error deleting user' });
+    }
 };
 
-// Search any User by name
+// Search users by name or email
 const getUsersByName = async (req, res) => {
-  const searchString = req.params.term;
+    const searchString = req.params.term;
 
-  try {
-      const users = await prisma.user.findMany({
-          where: {
-              OR: [
-                  { first_name: { contains: searchString } },
-                  { last_name: { contains: searchString } },
-                  { email: { contains: searchString } },
-              ],
-          },
-      });
+    try {
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { first_name: { contains: searchString } },
+                    { last_name: { contains: searchString } },
+                    { email: { contains: searchString } },
+                ],
+            },
+        });
 
-      if (!users || users.length === 0) {
-          return res.status(404).json({ message: 'User not found!' });
-      } else {
-          return res.status(200).json(users);
-      }
-  } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
+        if (!users || users.length === 0) {
+            return res.status(404).json({ message: 'User not found!' });
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ message: 'Error searching users' });
+    }
 };
 
+// User login
+const login = async (req, res) => {
+    const { email, password } = req.body;
 
-async function login(req, res) {
-  const { email, password } = req.body;
-
-  // ตรวจสอบว่าผู้ใช้กรอกข้อมูลครบหรือไม่
-  if (!email || !password) {
-    return res.status(400).send('Please fill in all fields.');
-  }
-
-  try {
-    // ค้นหาผู้ใช้ในฐานข้อมูลที่มี email ตรงกับที่กรอก
-    const user = await prisma.user.findUnique({
-      where: { email: email },
-    });
-
-    // ถ้าไม่พบผู้ใช้
-    if (!user) {
-      return res.status(404).send('User not found.');
+    if (!email || !password) {
+        return res.status(400).send('Please fill in all fields.');
     }
 
-    // ตรวจสอบ password โดยใช้ bcrypt (ถ้า password ถูกเข้ารหัส)
-    const validPassword = await bcrypt.compare(password, user.password);
-    
-    if (!validPassword) {
-      return res.status(401).send('Invalid password.');
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        
+        if (!validPassword) {
+            return res.status(401).send('Invalid password.');
+        }
+
+        res.status(200).send({ message: 'Login successful', user });
+    } catch (error) {
+        console.error('Error logging in:', error);
+        res.status(500).send('Server error');
     }
+};
 
-    // ถ้า email และ password ตรงกัน พาผู้ใช้ไปที่หน้า home
-    res.status(200).send({ message: 'Login successful', user: user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server error');
-  }
-}
-
-
-
-
-
-module.exports = { getUser, createUser , deleteUser, getUsersByName, login};
+module.exports = { getUser, createUser, deleteUser, getUsersByName, login };

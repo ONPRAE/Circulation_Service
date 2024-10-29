@@ -15,8 +15,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use('/api/v1', apiRouter);
-app.use('/images', express.static(path.join(__dirname, 'asset/picture/')));
-
+app.use('/uploads', express.static('uploads'));
 
 const port = 8800;
 app.listen(port, () => {

@@ -27,13 +27,23 @@
 
         <q-card-section>
           <div class="form-group">
-            <label for="productname">Product Name:</label>
-            <q-input v-model="productname" id="productname" required />
+            <label for="product_name">Product Name:</label>
+            <q-input v-model="product_name" id="product_name" required />
           </div>
 
           <div class="form-group">
             <label for="stock">Stock:</label>
             <q-input v-model="stock" type="number" id="stock" required min="1" />
+          </div>
+
+          <div class="form-group">
+            <label for="product_type">Type:</label>
+            <q-select 
+              v-model="product_type" 
+              id="product_type" 
+              :options="product_types" 
+              required 
+            />
           </div>
 
           <div class="form-group">
@@ -66,8 +76,8 @@
           </div>
 
           <div class="form-group">
-            <label for="productname">Product Name:</label>
-            <q-input v-model="productname" id="productname" required />
+            <label for="product_name">Product Name:</label>
+            <q-input v-model="product_name" id="product_name" required />
           </div>
 
           <div class="form-group">
@@ -79,6 +89,7 @@
             <label for="image">Image:</label>
             <input type="file" @change="onEditFileChange" accept="image/jpeg, image/png, image/gif" />
           </div>
+          
 
           <div v-if="editerrorMessage" class="error">{{ editerrorMessage }}</div>
           <div v-if="editsuccessMessage" class="success">{{ editsuccessMessage }}</div>
@@ -170,7 +181,8 @@ import axios from 'axios';
 // Define columns for the product table
 const productColumns = ref([
   { name: 'product_id', align: 'center', label: 'Product ID', field: 'product_id', sortable: true },
-  { name: 'productname', align: 'left', label: 'Product Name', field: 'productname', sortable: true },
+  { name: 'product_name', align: 'left', label: 'Product Name', field: 'product_name', sortable: true },
+  { name: 'product_type', align: 'right', label: 'Type', field: 'product_type', sortable: true },
   { name: 'stock', align: 'right', label: 'Stock', field: 'stock', sortable: true },
   { name: 'image', align: 'center', label: 'Image', field: 'image', sortable: true },
   { name: 'actions', align: 'center', label: 'Actions', field: 'actions', sortable: false },
@@ -190,9 +202,13 @@ const fetchProducts = () => {
 fetchProducts();
 
 // Dialog state and form data for adding and editing
+const product_types = ref([
+'ToolKids', 'Projector', 'Mouse', 'Laptop', 'Keyboard', 'Speaker', 'Monitor'
+]);
 const addProductDialog = ref(false);
 const editProductDialog = ref(false);
-const productname = ref('');
+const product_name = ref('');
+const product_type = ref('');
 const stock = ref(null);
 const image = ref(null);
 
@@ -205,7 +221,8 @@ const currentProductId = ref(null); // Stores the ID of the product being edited
 
 // Open the add product dialog
 const openAddProductDialog = () => {
-  productname.value = '';
+  product_name.value = '';
+  product_type.value = '';
   stock.value = null;
   image.value = null;
   errorMessage.value = '';
@@ -219,7 +236,8 @@ const onEditProduct = async (product_id) => {
     const response = await axios.get(`http://localhost:8800/api/v1/products/${product_id}`);
     const product = response.data;
 
-    productname.value = product.productname;
+    product_name.value = product.product_name;
+    product_type.value = product.product_type;
     stock.value = product.stock;
     image.value = null;
     
@@ -254,13 +272,14 @@ const submitForm = async () => {
   errorMessage.value = '';
   successMessage.value = '';
 
-  if (!productname.value || !stock.value || !image.value) {
+  if (!product_name.value || !stock.value || !image.value || !product_type.value) {
     errorMessage.value = 'All fields are required.';
     return;
   }
 
   const formData = new FormData();
-  formData.append('productname', productname.value);
+  formData.append('product_name', product_name.value);
+  formData.append('product_type', product_type.value);
   formData.append('stock', parseInt(stock.value));
   formData.append('image', image.value);
 
@@ -285,7 +304,7 @@ const submitEditForm = async (product_id) => {
   editerrorMessage.value = '';
   editsuccessMessage.value = '';
 
-  if (!productname.value || !stock.value) {
+  if (!product_name.value || !stock.value) {
     editerrorMessage.value = 'Product name and stock are required.';
     return;
   }
@@ -294,8 +313,9 @@ const submitEditForm = async (product_id) => {
   myHeaders.append("Content-Type", "application/json");
 
   const raw = JSON.stringify({
-    productname: productname.value,
+    product_name: product_name.value,
     stock: parseInt(stock.value, 10),
+    product_type: product_type.value,
     // Handle image upload and get the URL if necessary
     image: image.value ? await uploadImage(image.value) : null // Optional image upload function
   });

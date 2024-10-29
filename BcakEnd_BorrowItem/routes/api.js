@@ -7,7 +7,7 @@ const productController = require("../controller/products")
 const userController = require('../controller/users');
 const borrowController = require('../controller/borrow');
 
-router.post('/products', productController.uploadimg, productController.createProduct);
+router.post('/products', productController.createProduct);
 // Route definition using Express
 router.put('/products/:product_id', productController.updateProduct);
 
@@ -17,6 +17,7 @@ router.get('/products/:id', productController.getProductById);
 
 router.get('/borrows', borrowController.getBorrow);
 router.post('/borrows', borrowController.createBorrow);
+router.post('/borrow', borrowController.Borrow);
 router.put('/borrows/:id', borrowController.updateBorrowStatus);
 
 router.post('/users', userController.createUser);
