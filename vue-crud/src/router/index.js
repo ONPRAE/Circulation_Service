@@ -32,13 +32,6 @@ const router = createRouter({
       ]
     },
     {
-      path: '/borrowinfo',
-      component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
-      children: [
-        { path: '', component: () => import('../views/Borrowinfo.vue') } // หน้า CreateProduct
-      ]
-    },
-    {
       path: '/about',
       component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
       children: [
@@ -53,9 +46,11 @@ const router = createRouter({
       ]
     },
     {
-      path: '/products/:id',
-      name: 'about',
-      component: () => import('../views/UpdateProductView.vue')
+      path: '/borrow',
+      component: () => import('../Layouts/UserLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/BorrowView.vue') } // หน้า CreateProduct
+      ]
     },
   ]
 })

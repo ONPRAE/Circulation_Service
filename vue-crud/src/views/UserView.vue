@@ -1,25 +1,95 @@
 <template>
-  <div class="q-pa-md">
-    <q-table
-      title="Products"
-      :rows="productRows"
-      :columns="productColumns"
-      row-key="id"
-    >
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn icon="edit" @click="onEditProduct(props.row.product_id)" />
-          <q-btn icon="delete" @click="onDeleteProduct(props.row.product_id)" />
-        </q-td>
-      </template>
-    </q-table>
-  </div>
+  <q-page class="q-pa-lg flex flex-center">
+    <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
+
+      <!-- ย้ายคำว่า "อุปกรณ์" ไปทางซ้าย -->
+      <div class="text-h5 q-mb-md" style="text-align: left;">
+        อุปกรณ์
+      </div>
+
+      <q-card flat bordered>
+
+        <!-- ส่วนฟิลเตอร์ -->
+        <q-card-section>
+          <div class="q-gutter-md row q-col-gutter-md q-col-align-stretch justify-center">
+            <q-select
+              v-model="selectedType"
+              :options="deviceTypes"
+              label="Type"
+              filled
+              class="col-3"
+              dense
+            />
+            <q-option-group
+              v-model="selectedStatus"
+              :options="statusOptions"
+              type="radio"
+              inline
+              label="Status"
+              class="col-3"
+            />
+
+            <!-- เพิ่มช่องค้นหา -->
+            <q-input
+              v-model="searchQuery"
+              placeholder="ค้นหา..."
+              dense
+              filled
+              class="col-3"
+            />
+
+            <!-- ปุ่ม Search ที่มีขนาดตรงกับเส้นแดง -->
+            <q-btn 
+              label="Search" 
+              color="green" 
+              @click="filterDevices" 
+              dense
+              style="width: 80px; padding-top: 4px; padding-bottom: 4px; padding-left: 12px; padding-right: 12px;"
+            ></q-btn>
+          </div>
+        </q-card-section>
+
+        <!-- ตารางแสดงข้อมูล -->
+        <q-card-section>
+          <q-table
+            title="Products"
+            :rows="productRows"
+            :columns="productColumns"
+            row-key="id"
+          >
+            <!-- ช่องการกระทำ เช่น แก้ไข/ลบ -->
+            <template v-slot:body-cell-actions="props">
+              <q-td align="center">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="play_arrow"
+                  style="background-color: #00E676; color: white"
+                  @click="navigateToBorrowView"
+                />
+              </q-td>
+            </template>
+          </q-table>
+        </q-card-section>
+
+      </q-card>
+    </div>
+  </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import router from '@/router';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+// ฟังก์ชันการนำทางไปยัง BorrowView
+const navigateToBorrowView = () => {
+  router.push('/borrow');
+};
+
+// กำหนดข้อมูลคอลัมน์ของตาราง (ข้อมูลตัวอย่าง)
 const productColumns = ref([
   { name: 'product_id', align: 'center', label: 'Product ID', field: 'product_id', sortable: true },
   { name: 'productname', align: 'left', label: 'Product Name', field: 'productname', sortable: true },
@@ -28,6 +98,7 @@ const productColumns = ref([
 ]);
 const productRows = ref([]);
 
+// ฟังก์ชันสำหรับดึงข้อมูลผลิตภัณฑ์
 const fetchProducts = () => {
   fetch('http://localhost:8800/api/v1/products')
     .then(res => res.json())
@@ -38,27 +109,21 @@ const fetchProducts = () => {
 };
 fetchProducts();
 
-const onEditProduct = (id) => {
-  router.push(`/produpdate/${id}`);
+// ฟิลเตอร์ข้อมูล
+const deviceTypes = ref(['ToolKids', 'Projector', 'Mouse', 'Laptop', 'Keyboard', 'Speaker', 'Monitor']);
+const statusOptions = ref([
+  { label: 'Available', value: 'Available' },
+  { label: 'Unavailable', value: 'Unavailable' }
+]);
+
+const selectedType = ref('');
+const selectedStatus = ref('Available');
+
+// ข้อมูลสำหรับช่องค้นหา
+const searchQuery = ref('');
+
+// ฟังก์ชันค้นหา
+const filterDevices = () => {
+  console.log("ค้นหาด้วยคำว่า:", searchQuery.value);
 };
-
-const onDeleteProduct = (id) => {
-  const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
-
-  const requestOptions = {
-    method: 'Add',
-    headers: myHeaders,
-    redirect: 'follow'
-  };
-
-  fetch(`http://localhost:8800/api/v1/products/${id}`, requestOptions)
-    .then(response => response.json())
-    .then(result => {
-      alert(result.message);
-      fetchProducts(); 
-    })
-    .catch(error => console.error('Error deleting Product:', error));
-};
-
 </script>
