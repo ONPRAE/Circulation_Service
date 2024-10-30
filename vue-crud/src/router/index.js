@@ -19,7 +19,7 @@ const router = createRouter({
     },
     {
       path: '/home',
-      component: () => import('../Layouts/DrawerLayout.vue'), // ใช้ DrawerLayout
+      component: () => import('../Layouts/AdminLayout.vue'), // ใช้ DrawerLayout
       children: [
         { path: '', component: () => import('../views/HomeView.vue') } // หน้า Home
       ]
