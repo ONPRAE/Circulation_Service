@@ -6,7 +6,7 @@
           <q-card-section>
             <div class="header-section">
               <span class="title">รายการ</span>
-              <span class="back-link">กลับ</span>
+              <span class="back-link" @click="goBack">กลับ</span>
             </div>
             <div class="device-id">ID: E568905</div>
             <q-separator class="q-mt-md" />
@@ -100,6 +100,7 @@
   </template>
   
   <script>
+
   export default {
     data() {
       return {
@@ -114,7 +115,12 @@
         note: "-"
       };
     },
-    methods: {
+      methods: {
+        //คำสั่งย้อนกลับ
+        goBack() {
+          window.history.back();
+          },
+        
       showDialog() {
         this.dialog = true;
       },
