@@ -29,7 +29,7 @@
   import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
   import { saveAs } from 'file-saver';
-  import axios from 'axios';
+  import axios from 'axios'; 
   
   // Define columns for the product table
   const productColumns = ref([

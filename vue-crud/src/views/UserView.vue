@@ -38,7 +38,7 @@
               class="col-3"
             />
 
-            <!-- ปุ่ม Search ที่มีขนาดตรงกับเส้นแดง -->
+            <!-- ปุ่ม Search -->
             <q-btn 
               label="Search" 
               color="green" 
@@ -53,9 +53,9 @@
         <q-card-section>
           <q-table
             title="Products"
-            :rows="productRows"
+            :rows="filteredProductRows"
             :columns="productColumns"
-            row-key="id"
+            row-key="product_id"
           >
             <!-- ช่องการกระทำ เช่น แก้ไข/ลบ -->
             <template v-slot:body-cell-actions="props">
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -122,6 +122,19 @@ const selectedStatus = ref('Available');
 
 // ข้อมูลสำหรับช่องค้นหา
 const searchQuery = ref('');
+
+// กรองสินค้าตามเงื่อนไขที่เลือก
+const filteredProductRows = computed(() => {
+  return productRows.value.filter(product => {
+    // เงื่อนไขการค้นหาตามประเภท
+    const matchesType = selectedType.value ? product.product_type === selectedType.value : true;
+    // เงื่อนไขการค้นหาตามสถานะ
+    const matchesStatus = selectedStatus.value === 'Available' ? product.stock > 0 : product.stock === 0;
+    // เงื่อนไขการค้นหาตามคำค้นหา
+    const matchesQuery = product.product_name.toLowerCase().includes(searchQuery.value.toLowerCase());
+    return matchesType && matchesStatus && matchesQuery;
+  });
+});
 
 // ฟังก์ชันค้นหา
 const filterDevices = () => {
