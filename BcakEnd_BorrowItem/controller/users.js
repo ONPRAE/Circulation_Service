@@ -108,6 +108,14 @@ const login = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { email },
+            select: {
+                email: true,
+                password: true,
+                role: true,
+                first_name: true,
+                last_name: true,
+                user_id: true,
+            },
         });
 
         if (!user) {
@@ -115,10 +123,13 @@ const login = async (req, res) => {
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
-        
+
         if (!validPassword) {
             return res.status(401).send('Invalid password.');
         }
+
+        // Remove password before sending the response
+        delete user.password;
 
         res.status(200).send({ message: 'Login successful', user });
     } catch (error) {
@@ -126,5 +137,6 @@ const login = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
 
 module.exports = { getUser, createUser, deleteUser, getUsersByName, login };

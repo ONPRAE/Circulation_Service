@@ -54,40 +54,44 @@ export default {
     };
   },
   methods: {
-  async onSubmit() {
-    if (this.email && this.password) {
-      try {
-        // เรียก API login จาก Backend
-        const response = await axios.post('http://localhost:8800/api/v1/login', {
-          email: this.email,
-          password: this.password,
-        });
+  async   onSubmit() {
+  if (this.email && this.password) {
+    try {
+      // เรียก API สำหรับล็อกอิน
+      const response = await axios.post('http://localhost:8800/api/v1/login', {
+        email: this.email,
+        password: this.password,
+      });
 
-        // ตรวจสอบสถานะ login สำเร็จ
-        if (response.status === 200) {
-          const userRole = response.data.role; // assuming role is in response data
-          
-          if (userRole === 'Admin' || userRole === 'admin') {
-  this.$router.push('/home');
-} else if (userRole === 'User' || userRole === 'user') {
-  this.$router.push('/about');
-} else {
-  alert('Unknown role. Please contact support.');
+      // ตรวจสอบสถานะการตอบกลับ
+      if (response.status === 200) {
+        const userRole = response.data.user.role; // สมมติว่าบทบาทอยู่ใน response.data.user.role
+
+        // นำทางตามบทบาทของผู้ใช้
+        if (userRole === 'Admin') {
+          this.$router.push('/home');
+        } else if (userRole === 'User') {
+          this.$router.push('/user');
+        }  else {
+          alert('บทบาทไม่เป็นที่รู้จัก โปรดติดต่อผู้ดูแลระบบ');
+        }
+      } else {
+        alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่');
+      }
+    } catch (error) {
+      // จัดการข้อผิดพลาด เช่น รหัสผ่านไม่ถูกต้องหรือข้อผิดพลาดของเซิร์ฟเวอร์
+      if (error.response && error.response.data) {
+        alert(error.response.data.message || 'การเข้าสู่ระบบล้มเหลว กรุณาตรวจสอบข้อมูลอีกครั้ง');
+      } else {
+        alert('เกิดข้อผิดพลาดทางเครือข่าย กรุณาลองใหม่ภายหลัง');
+      }
+    }
+  } else {
+    alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+  }
 }
 
-        }
-      } catch (error) {
-        // กรณีเกิดข้อผิดพลาด เช่นรหัสผ่านไม่ถูกต้อง
-        if (error.response) {
-          alert(error.response.data); // แจ้งเตือนผู้ใช้ถึงข้อผิดพลาดที่เกิดขึ้น
-        } else {
-          alert('An error occurred. Please try again later.');
-        }
-      }
-    } else {
-      alert('Please fill in all fields.');
-    }
-  },
+,
   goToSignUp() {
     this.$router.push('/signup'); // พาผู้ใช้ไปที่หน้า signup
   },
