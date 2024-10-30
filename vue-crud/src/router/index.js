@@ -47,10 +47,11 @@ const router = createRouter({
     },
     {
       path: '/product',
-      component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
+      component: () => import('../Layouts/AdminLayout.vue'), // ใช้ DrawerLayout
       children: [
         { path: '', component: () => import('../views/ProductView.vue') }
-     ]},
+      ]
+    },
     { // หน้า Home
       path: '/borrow',
       component: () => import('../Layouts/UserLayout.vue'), // ใช้ DrawerLayout
@@ -58,6 +59,21 @@ const router = createRouter({
         { path: '', component: () => import('../views/BorrowView.vue') } // หน้า CreateProduct
       ]
     },
+    { // หน้า Home
+      path: '/borrowinfo',
+      component: () => import('../Layouts/AdminLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/Borrowinfo.vue') } // หน้า CreateProduct
+      ]
+    },
+    { // หน้า Home
+      path: '/userinfo',
+      component: () => import('../Layouts/AdminLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/UserInfo.vue') } // หน้า CreateProduct
+      ]
+    },
+
   ]
 })
 
