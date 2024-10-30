@@ -5,6 +5,7 @@ import App from './App.vue'
 import router from './router'
 import { Quasar } from 'quasar'
 
+
 // Import icon libraries
 import '@quasar/extras/material-icons/material-icons.css'
 
@@ -19,3 +20,4 @@ app.use(Quasar, {
   })
 
 app.mount('#app')
+
