@@ -14,10 +14,11 @@ const getBorrow = async (req, res) => {
 
 // Create a new borrow
 const createBorrow = async (req, res) => {
-    const { user_id, borrow_date, borrow_period, products } = req.body; // Assuming products is an array of { product_id, amount }
+    const { user_id, borrow_date, borrow_return, products } = req.body; // Assuming products is an array of { product_id, amount }
 
     // Validate date format
     const parsedBorrowDate = new Date(borrow_date);
+    const parsedBorrowReturn = new Date(borrow_return);
 
     if (isNaN(parsedBorrowDate.getTime())) {
         return res.status(400).json({ error: 'Invalid borrow date format. Use YYYY-MM-DD.' });
@@ -28,7 +29,7 @@ const createBorrow = async (req, res) => {
             data: {
                 user_id,
                 borrow_date: parsedBorrowDate,
-                borrow_return: null, // Default to null until return date is set
+                borrow_return: parsedBorrowReturn, // Default to null until return date is set
                 status: 'Pending', // Default status
             },
         });
