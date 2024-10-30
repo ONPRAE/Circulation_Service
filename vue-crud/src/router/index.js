@@ -73,6 +73,7 @@ const router = createRouter({
         { path: '', component: () => import('../views/UserInfo.vue') } // หน้า CreateProduct
       ]
     },
+
   ]
 })
 
