@@ -73,6 +73,13 @@ const router = createRouter({
         { path: '', component: () => import('../views/UserInfo.vue') } // หน้า CreateProduct
       ]
     },
+    { // หน้า Home
+      path: '/prodreport',
+      component: () => import('../Layouts/AdminLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/ProductReport.vue') } // หน้า CreateProduct
+      ]
+    },
 
   ]
 })

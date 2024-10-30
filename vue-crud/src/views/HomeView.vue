@@ -19,14 +19,14 @@
 
           <q-card class="col-2 text-center q-pa-md">
             <q-card-section>
-              <div>กำลังถูกคืน</div>
+              <div>กำลังถูกยืม</div>
               <div class="text-orange text-h6">8 รายการ</div>
             </q-card-section>
           </q-card>
 
           <q-card class="col-2 text-center q-pa-md">
             <q-card-section>
-              <div>เสร็จสิ้น</div>
+              <div>คืนเสร็จสิ้น</div>
               <div class="text-orange text-h6">5 รายการ</div>
             </q-card-section>
           </q-card>
@@ -43,7 +43,7 @@
         <div class="row q-gutter-md q-px-md">
           <q-card class="col-11 q-pa-md">
             <q-card-section>
-              <h6>เลขที่เลยที่หมดคืน</h6>
+              <h6>เลขที่เลยกำหนดคืน</h6>
               <q-table :rows="returnList" :columns="columns" row-key="id" flat rows-per-page-options="[5, 10, 15]">
                 <template v-slot:body-cell-status="props">
                   <q-badge color="orange" class="text-white">{{ props.row.status }}</q-badge>

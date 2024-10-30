@@ -66,7 +66,7 @@
         <!-- รายงาน -->
         <q-separator spaced />
         <div style="padding-left: 24px; font-weight: bold; color: black;">รายงาน</div>
-        <q-item clickable v-ripple to="/device-report" style="padding-left: 16px;">
+        <q-item clickable v-ripple to="/prodreport" style="padding-left: 16px;">
           <q-item-section avatar>
             <q-icon name="assignment" color="black"></q-icon>
           </q-item-section>
