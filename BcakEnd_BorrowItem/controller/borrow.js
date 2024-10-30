@@ -38,7 +38,7 @@ const createBorrow = async (req, res) => {
         const borrowDetails = products.map(product => ({
             borrow_id: borrow.borrow_id,
             product_id: product.product_id,
-            amount: product.amount,
+            amount: 1,
         }));
 
         await prisma.borrowdetail.createMany({
@@ -79,4 +79,4 @@ const updateBorrowStatus = async (req, res) => {
 
 
 
-module.exports = { Borrow, createBorrow, getBorrow, updateBorrowStatus };
+module.exports = { createBorrow, getBorrow, updateBorrowStatus };

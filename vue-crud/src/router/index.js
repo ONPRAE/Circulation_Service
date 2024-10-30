@@ -53,7 +53,8 @@ const router = createRouter({
       ]
     },
     { // หน้า Home
-      path: '/borrow',
+      path: '/borrow/:id',
+      name:'borrow',
       component: () => import('../Layouts/UserLayout.vue'), // ใช้ DrawerLayout
       children: [
         { path: '', component: () => import('../views/BorrowView.vue') } // หน้า CreateProduct

@@ -1,145 +1,164 @@
 <template> 
-    <div class="content-container">
-      <div class="content">
-        <!-- ส่วนแสดงรายละเอียดอุปกรณ์ -->
-        <q-card class="device-card q-mb-md">
-          <q-card-section>
-            <div class="header-section">
-              <span class="title">รายการ</span>
-              <span class="back-link" @click="goBack">กลับ</span>
+  <div class="content-container">
+    <div class="content">
+      <!-- ส่วนแสดงรายละเอียดอุปกรณ์ -->
+      <q-card class="device-card q-mb-md">
+        <q-card-section>
+          <div class="header-section">
+            <span class="title">รายการ</span>
+            <span class="back-link" @click="goBack">กลับ</span>
+          </div>
+          <div class="device-id">ID<q-input
+              dense
+              filled
+              v-model="id" readonly/></div>
+          <q-separator class="q-mt-md" />
+
+          <!-- รายละเอียดอุปกรณ์ในรูปแบบแถวเดียว -->
+          <div class="device-details">
+            <div class="detail-item">
+              <span class="detail-label">Device</span>
+              <span class="detail-value"><q-input dense filled v-model="product_name" readonly/></span>
             </div>
-            <div class="device-id">ID: E568905</div>
-            <q-separator class="q-mt-md" />
-  
-            <!-- รายละเอียดอุปกรณ์ในรูปแบบแถวเดียว -->
-            <div class="device-details">
-              <div class="detail-item">
-                <span class="detail-label">Device</span>
-                <span class="detail-value">อุปกรณ์1</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Model</span>
-                <span class="detail-value">model</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Stock</span>
-                <span class="detail-value">
-                  3
-                  <q-badge color="green" class="status-badge">พร้อมยืม</q-badge>
-                </span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Type</span>
-                <span class="detail-value">Computer</span>
-              </div>
+            <div class="detail-item">
+              <span class="detail-label">Stock</span>
+              <span class="detail-value"><q-input dense filled v-model="stock" readonly/></span>
             </div>
-          </q-card-section>
-        </q-card>
-  
-        <!-- ฟอร์มการยืม -->
-        <q-card class="form-card">
-          <q-card-section>
-            <div class="form-grid">
-              <q-input
-                outlined
-                v-model="borrowDate"
-                label="Borrow date"
-                type="date"
-                class="q-mb-md input-field"
-                dense
-              />
-              <q-input
-                outlined
-                v-model="returnDate"
-                label="Return date"
-                type="date"
-                class="q-mb-md input-field"
-                dense
-              />
+            <div class="detail-item">
+              <span class="detail-label">Type</span>
+              <span class="detail-value"><q-input dense filled v-model="product_type" readonly/></span>
             </div>
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <!-- ฟอร์มการยืม -->
+      <q-card class="form-card">
+        <q-card-section>
+          <div class="form-grid">
             <q-input
               outlined
-              v-model="note"
-              label="Note"
-              type="textarea"
-              class="q-mb-md note-field"
+              v-model="borrowDate"
+              label="Borrow date"
+              type="date"
+              class="q-mb-md input-field"
               dense
             />
-            <div class="button-container">
-              <q-btn color="primary" label="ยืนยันการยืม" class="confirm-btn" @click="showDialog" />
-            </div>
-          </q-card-section>
-        </q-card>
-  
-        <!-- Dialog Pop-up -->
-        <q-dialog v-model="dialog" persistent>
-          <q-card class="dialog-card">
-            <q-card-section class="dialog-header">
-              <div class="text-h6">Information Details</div>
-            </q-card-section>
-  
-            <q-card-section class="dialog-content">
-              <q-input label="ID" v-model="deviceId" outlined dense readonly class="dialog-input" />
-              <q-input label="Device" v-model="device" outlined dense readonly class="dialog-input" />
-              <q-input label="Model" v-model="model" outlined dense readonly class="dialog-input" />
-              <q-input label="Type" v-model="type" outlined dense readonly class="dialog-input" />
-              <q-input label="Brand" v-model="brand" outlined dense readonly class="dialog-input" />
-              <q-input label="กำหนดวันยืม" v-model="borrowDate" outlined dense readonly class="dialog-input" />
-              <q-input label="กำหนดวันคืน" v-model="returnDate" outlined dense readonly class="dialog-input" />
-              <q-input label="Note" v-model="note" outlined dense readonly class="dialog-input" />
-            </q-card-section>
-  
-            <q-card-actions align="right" class="dialog-actions">
-              <q-btn color="green" label="Save" class="dialog-btn" @click="saveDialog" />
-              <q-btn color="primary" label="Close" flat class="dialog-btn" @click="dialog = false" />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
-      </div>
-    </div>
-  </template>
-  
-  <script>
+            <q-input
+              outlined
+              v-model="returnDate"
+              label="Return date"
+              type="date"
+              class="q-mb-md input-field"
+              dense
+            />
+          </div>
+          <div class="button-container">
+            <q-btn color="primary" label="ยืนยันการยืม" class="confirm-btn" @click="showDialog" />
+          </div>
+        </q-card-section>
+      </q-card>
 
-  export default {
-    data() {
-      return {
-        dialog: false,
-        deviceId: "E534700",
-        device: "อุปกรณ์8",
-        model: "Model",
-        type: "Computer",
-        brand: "MSI",
-        borrowDate: "16 Oct 2024",
-        returnDate: "23 Oct 2024",
-        note: "-"
-      };
-    },
-      methods: {
-        //คำสั่งย้อนกลับ
-        goBack() {
-          window.history.back();
-          },
-        
-      showDialog() {
-        this.dialog = true;
-      },
-      saveDialog() {
-        console.log("Saved information:", {
-          deviceId: this.deviceId,
-          device: this.device,
-          model: this.model,
-          type: this.type,
-          brand: this.brand,
-          borrowDate: this.borrowDate,
-          returnDate: this.returnDate,
-          note: this.note,
-        });
-        this.dialog = false;
+      <!-- Dialog Pop-up -->
+      <q-dialog v-model="dialog" persistent>
+        <q-card class="dialog-card">
+          <q-card-section class="dialog-header">
+            <div class="text-h6">Information Details</div>
+          </q-card-section>
+
+          <q-card-section class="dialog-content">
+            <q-input label="ID" v-model="id" outlined dense readonly class="dialog-input" />
+            <q-input label="กำหนดวันยืม" v-model="borrowDate" outlined dense readonly class="dialog-input" />
+            <q-input label="กำหนดวันคืน" v-model="returnDate" outlined dense readonly class="dialog-input" />
+            <q-input label="จำนวน" v-model="amount" outlined dense class="dialog-input" type="number" />
+          </q-card-section>
+
+          <q-card-actions align="right" class="dialog-actions">
+            <q-btn color="green" label="Save" class="dialog-btn" @click="saveDialog" />
+            <q-btn color="primary" label="Close" flat class="dialog-btn" @click="dialog = false" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+export default {
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+
+    // ตัวแปรสำหรับการจัดเก็บข้อมูลอุปกรณ์และฟอร์มการยืม
+    const id = ref(route.params.id || '');
+    const product_name = ref('');
+    const product_type = ref('');
+    const stock = ref('');
+    const borrowDate = ref('');
+    const returnDate = ref('');
+    const amount = ref(1);
+    const dialog = ref(false);
+
+    // ฟังก์ชันดึงข้อมูล
+    const fetchData = () => {
+      if (id.value) {
+        fetch(`http://localhost:8800/api/v1/products/${id.value}`)
+          .then((res) => res.json())
+          .then((result) => {
+            product_name.value = result.product_name;
+            product_type.value = result.product_type;
+            stock.value = result.stock;
+          })
+          .catch((error) => {
+            console.error('Error fetching product data:', error);
+            alert('Error fetching product data:', error);
+          });
       }
-    },
-  };
-  </script>
+    };
+
+    // ฟังก์ชันสำหรับการบันทึก
+    const saveDialog = () => {
+      const data = {
+        product_id: id.value,
+        borrow_date: borrowDate.value,
+        return_date: returnDate.value,
+        amount: amount.value
+      };
+      console.log("Data to save:", data);
+      dialog.value = false;
+    };
+
+    // ฟังก์ชันสำหรับกลับไปหน้าก่อนหน้า
+    const goBack = () => {
+      router.back();
+    };
+
+    // เรียก fetchData เมื่อ component ถูก mount
+    onMounted(() => {
+      fetchData();
+    });
+
+    return {
+      id,
+      product_name,
+      product_type,
+      stock,
+      borrowDate,
+      returnDate,
+      amount,
+      dialog,
+      saveDialog,
+      goBack,
+      showDialog: () => (dialog.value = true),
+    };
+  },
+};
+</script>
+
+
   
   <style scoped>
   .content-container {

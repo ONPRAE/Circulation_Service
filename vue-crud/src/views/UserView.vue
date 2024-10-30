@@ -66,7 +66,7 @@
                   dense
                   icon="play_arrow"
                   style="background-color: #00E676; color: white"
-                  @click="navigateToBorrowView"
+                  @click="navigateToBorrowView(props.row.product_id)"
                 />
               </q-td>
             </template>
@@ -84,10 +84,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-// ฟังก์ชันการนำทางไปยัง BorrowView
-const navigateToBorrowView = () => {
-  router.push('/borrow');
-};
+
 
 // กำหนดข้อมูลคอลัมน์ของตาราง (ข้อมูลตัวอย่าง)
 const productColumns = ref([
@@ -110,6 +107,10 @@ const fetchProducts = () => {
 };
 fetchProducts();
 
+// ฟังก์ชันการนำทางไปยัง BorrowView
+const navigateToBorrowView = (id) => {
+  router.push('/borrow/'+ id);
+};
 // ฟิลเตอร์ข้อมูล
 const deviceTypes = ref(['ToolKids', 'Projector', 'Mouse', 'Laptop', 'Keyboard', 'Speaker', 'Monitor']);
 const statusOptions = ref([

@@ -137,6 +137,26 @@ const login = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+// Example in users.js
+const getUserRole = async (req, res) => {
+    const { userId } = req.query; // Assuming the client sends user ID as a query parameter
 
+    try {
+        const user = await prisma.user.findUnique({
+            where: { user_id: parseInt(userId, 10) },
+            select: { role: true },
+        });
 
-module.exports = { getUser, createUser, deleteUser, getUsersByName, login };
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json({ role: user.role });
+    } catch (error) {
+        console.error('Error fetching user role:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole };
+

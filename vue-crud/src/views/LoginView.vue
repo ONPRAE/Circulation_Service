@@ -54,49 +54,50 @@ export default {
     };
   },
   methods: {
-  async   onSubmit() {
-  if (this.email && this.password) {
-    try {
-      // เรียก API สำหรับล็อกอิน
-      const response = await axios.post('http://localhost:8800/api/v1/login', {
-        email: this.email,
-        password: this.password,
-      });
+    async onSubmit() {
+      if (this.email && this.password) {
+        try {
+          // เรียก API สำหรับล็อกอิน
+          const response = await axios.post('http://localhost:8800/api/v1/login', {
+            email: this.email,
+            password: this.password,
+          });
 
-      // ตรวจสอบสถานะการตอบกลับ
-      if (response.status === 200) {
-        const userRole = response.data.user.role; // สมมติว่าบทบาทอยู่ใน response.data.user.role
+          // ตรวจสอบสถานะการตอบกลับ
+          if (response.status === 200) {
+            const user = response.data.user; // สมมติว่า user object อยู่ใน response.data.user
+            
+            // เก็บ user_id และ user_role ใน Local Storage
+            localStorage.setItem('user_id', user.user_id);
+            localStorage.setItem('user_role', user.role);
 
-        // นำทางตามบทบาทของผู้ใช้
-        if (userRole === 'Admin') {
-          this.$router.push('/home');
-        } else if (userRole === 'User') {
-          this.$router.push('/user');
-        }  else {
-          alert('บทบาทไม่เป็นที่รู้จัก โปรดติดต่อผู้ดูแลระบบ');
+            // นำทางตามบทบาทของผู้ใช้
+            if (user.role === 'Admin') {
+              this.$router.push('/home');
+            } else if (user.role === 'User') {
+              this.$router.push('/user');
+            } else {
+              alert('บทบาทไม่เป็นที่รู้จัก โปรดติดต่อผู้ดูแลระบบ');
+            }
+          } else {
+            alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่');
+          }
+        } catch (error) {
+          // จัดการข้อผิดพลาด เช่น รหัสผ่านไม่ถูกต้องหรือข้อผิดพลาดของเซิร์ฟเวอร์
+          if (error.response && error.response.data) {
+            alert(error.response.data.message || 'การเข้าสู่ระบบล้มเหลว กรุณาตรวจสอบข้อมูลอีกครั้ง');
+          } else {
+            alert('เกิดข้อผิดพลาดทางเครือข่าย กรุณาลองใหม่ภายหลัง');
+          }
         }
       } else {
-        alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่');
+        alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
       }
-    } catch (error) {
-      // จัดการข้อผิดพลาด เช่น รหัสผ่านไม่ถูกต้องหรือข้อผิดพลาดของเซิร์ฟเวอร์
-      if (error.response && error.response.data) {
-        alert(error.response.data.message || 'การเข้าสู่ระบบล้มเหลว กรุณาตรวจสอบข้อมูลอีกครั้ง');
-      } else {
-        alert('เกิดข้อผิดพลาดทางเครือข่าย กรุณาลองใหม่ภายหลัง');
-      }
-    }
-  } else {
-    alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
-  }
-}
-
-,
-  goToSignUp() {
-    this.$router.push('/signup'); // พาผู้ใช้ไปที่หน้า signup
+    },
+    goToSignUp() {
+      this.$router.push('/signup'); // พาผู้ใช้ไปที่หน้า signup
+    },
   },
-},
-
 };
 </script>
 
