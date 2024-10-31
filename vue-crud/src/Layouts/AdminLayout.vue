@@ -66,7 +66,7 @@
         <!-- รายงาน -->
         <q-separator spaced />
         <div style="padding-left: 24px; font-weight: bold; color: black;">รายงาน</div>
-        <q-item clickable v-ripple to="/device-report" style="padding-left: 16px;">
+        <q-item clickable v-ripple to="/prodreport" style="padding-left: 16px;">
           <q-item-section avatar>
             <q-icon name="assignment" color="black"></q-icon>
           </q-item-section>
@@ -89,8 +89,21 @@
           </q-item-section>
           <q-item-section style="color: black;">ข้อมูลส่วนตัว</q-item-section>
         </q-item>
+
+            <!-- ปุ่ม Logout -->
+    <div class="text-right q-mb-md">
+          <q-btn 
+            label="Logout" 
+            color="red" 
+            @click="logout" 
+            dense
+            style="width: 80px; padding-top: 4px; padding-bottom: 4px; padding-left: 12px; padding-right: 12px;"
+          ></q-btn>
+        </div>
       </q-list>
     </q-drawer>
+
+
 
     <!-- ส่วนนี้จะแสดงเนื้อหาของแต่ละหน้า -->
     <q-page-container>
@@ -100,11 +113,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const leftDrawerOpen = ref(false)
+const router = useRouter();
+const leftDrawerOpen = ref(false);
+
+const logout = () => {
+  fetch('http://localhost:8800/api/v1/logout', { method: 'POST' })
+    .then((res) => {
+      if (res.ok) {
+        localStorage.removeItem('user'); // ลบข้อมูลผู้ใช้ที่เก็บไว้ใน LocalStorage
+        router.push('/'); // เปลี่ยนเส้นทางไปยังหน้า Login
+      } else {
+        console.error('Failed to logout');
+      }
+    })
+    .catch((error) => {
+      console.error('Logout error:', error);
+    });
+};
 </script>
+
 
 <style>
 .custom-drawer {

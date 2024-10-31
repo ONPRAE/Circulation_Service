@@ -1,6 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf">
-
     <!-- Drawer สำหรับเมนูนำทางทางด้านซ้าย -->
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered style="background-color: #ffffff; width: 250px;">
       <q-list>
@@ -14,8 +13,9 @@
             KU-IT<br />CIRCULATION SERVICE
           </div>
         </div>
-               <!-- Profile Section -->
-       <q-separator spaced />
+
+        <!-- Profile Section -->
+        <q-separator spaced />
         <div style="padding-left: 24px; font-weight: bold; color: black;">Profile</div>
 
         <!-- Profile link with dynamic user ID -->
@@ -50,6 +50,16 @@
           <q-item-section style="color: black;">ประวัติทั้งหมด</q-item-section>
         </q-item>
 
+        <!-- ปุ่ม Logout -->
+        <div class="text-right q-mb-md">
+          <q-btn 
+            label="Logout" 
+            color="red" 
+            @click="logout" 
+            dense
+            style="width: 80px; padding-top: 4px; padding-bottom: 4px; padding-left: 12px; padding-right: 12px;"
+          ></q-btn>
+        </div>
 
       </q-list>
     </q-drawer>
@@ -58,15 +68,30 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const leftDrawerOpen = ref(false)
+
+const leftDrawerOpen = ref(false);
+const router = useRouter();
+const logout = () => {
+  fetch('http://localhost:8800/api/v1/logout', { method: 'POST' })
+    .then((res) => {
+      if (res.ok) {
+        localStorage.removeItem('user'); // ลบข้อมูลผู้ใช้ที่เก็บไว้ใน LocalStorage
+        router.push('/'); // เปลี่ยนเส้นทางไปยังหน้า Login
+      } else {
+        console.error('Failed to logout');
+      }
+    })
+    .catch((error) => {
+      console.error('Logout error:', error);
+    });
+};
 </script>
 
 <style>

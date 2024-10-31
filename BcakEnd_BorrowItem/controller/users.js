@@ -138,23 +138,39 @@ const login = async (req, res) => {
 };
 // Example in users.js
 const getUserRole = async (req, res) => {
-    const { userId } = req.query; // Assuming the client sends user ID as a query parameter
+    const { userId } = req.query; // Get user ID from query parameter
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { user_id: parseInt(userId, 10) },
-            select: { role: true },
-        });
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        res.status(200).json({ role: user.role });
+      // Ensure userId is present and parsed as an integer
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const parsedUserId = parseInt(userId, 10);
+      
+      if (isNaN(parsedUserId)) {
+        return res.status(400).json({ error: "User ID must be a valid integer" });
+      }
+    
+      const user = await prisma.user.findUnique({
+        where: {
+          user_id: parsedUserId, // Use parsed integer userId
+        },
+        select: {
+          role: true,
+        },
+      });
+    
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+    
+      res.json({ role: user.role });
     } catch (error) {
-        console.error('Error fetching user role:', error);
-        res.status(500).json({ error: 'Server error' });
+      console.error("Error fetching user role:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
+
 };
 
 // Get user by ID
@@ -177,6 +193,17 @@ const getUserById = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    try {
+        // ในกรณีนี้การ Logout ไม่มีการจัดการเพิ่มเติมใน Backend
+        // เพียงแค่ตอบกลับไปเพื่อยืนยันว่าการ Logout สำเร็จแล้ว
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Error logging out:', error);
+        res.status(500).json({ error: 'Error during logout' });
+    }
+};
 
-module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole,getUserById };
+
+module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole,getUserById, logout };
 

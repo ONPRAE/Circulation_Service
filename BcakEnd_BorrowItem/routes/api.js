@@ -15,7 +15,9 @@ router.get('/products/:id', productController.getProductById);
 
 router.get('/borrows', borrowController.getBorrow);
 router.post('/borrows', borrowController.createBorrow);
-router.put('/borrows/:id', borrowController.updateBorrowStatus);
+router.put('/borrows/:borrow_id', borrowController.updateBorrowStatus);
+router.get('/borrows/:id', borrowController.getBorrowById);
+
 
 router.post('/users', userController.createUser);
 router.delete('/users/:id', userController.deleteUser);
@@ -24,6 +26,7 @@ router.get('/users/q/:term', userController.getUsersByName);
 router.get('/users', userController.getUser);
 router.post('/login', userController.login);
 router.get('/user/role', userController.getUserRole);
+router.post('/logout', userController.logout);
 
 
 

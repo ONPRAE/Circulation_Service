@@ -106,7 +106,21 @@ export default {
       return new Date(date).toLocaleDateString();
     };
 
+        // Check the user role and redirect if needed
+        const checkUserRole = async () => {
+      try {
+        const userResponse = await fetch("http://localhost:8800/api/v1/user/role"); // Endpoint for user role
+        const userData = await userResponse.json();
+        if (userData.role === 'User') {
+          router.push('/user'); // Redirect if role is "User"
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      }
+    };
+
     onMounted(() => {
+      checkUserRole();
       fetchBorrows(); // ดึงข้อมูลเมื่อ component ถูก mount
     });
 

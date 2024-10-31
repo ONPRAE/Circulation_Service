@@ -1,7 +1,5 @@
-const { PrismaClient, borrow_status } = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
-
 
 // Create a new borrow
 const createBorrow = async (req, res) => {
@@ -20,7 +18,7 @@ const createBorrow = async (req, res) => {
             data: {
                 user_id: parseInt(user_id),
                 borrow_date: parsedBorrowDate,
-                borrow_return: parsedBorrowReturn, // Default to null until return date is set
+                borrow_return: parsedBorrowReturn,
                 status: 'Pending', // Default status
             },
         });
@@ -51,7 +49,7 @@ const getBorrow = async (req, res) => {
         const borrows = await prisma.borrow.findMany({
             include: { 
                 borrowdetails: {
-                    include: { product: true }  // ดึงข้อมูล product ที่สัมพันธ์ใน borrowdetails
+                    include: { product: true }
                 }
             }
         });
@@ -62,34 +60,84 @@ const getBorrow = async (req, res) => {
     }
 };
 
-
-
 // Update borrow status
 const updateBorrowStatus = async (req, res) => {
-    const { borrow_id, status } = req.body;
+    const { borrow_id } = req.params;
+    const { status } = req.body;
 
-    // ตรวจสอบว่า status อยู่ในลิสต์ที่อนุญาต
-    if (!borrowStatuses.includes(status)) {
-        return res.status(400).json({ error: `Invalid status value. Must be one of: ${borrowStatuses.join(', ')}.` });
+    // Validate that borrow_id is provided in the URL
+    if (!borrow_id) {
+        return res.status(400).json({ error: 'borrow_id is required in URL' });
+    }
+
+    // Validate that status is provided in the request body
+    if (!status) {
+        return res.status(400).json({ error: 'Status is required in the request body' });
     }
 
     try {
-        const updatedBorrow = await prisma.borrow.update({
-            where: { borrow_id },
-            data: { status },
+        // Start a transaction
+        const result = await prisma.$transaction(async (transactionPrisma) => {
+            console.log(`Updating borrow record with ID: ${borrow_id} to status: ${status}`);
+
+            // Update the borrow status
+            const updatedBorrow = await transactionPrisma.borrow.update({
+                where: { borrow_id: parseInt(borrow_id) },
+                data: { status },
+            });
+
+            console.log(`Updated borrow status for borrow_id: ${borrow_id}.`);
+
+            // If the status is set to "Return", update the stock of each related product
+            if (status === "Return") {
+                console.log(`Status is "Return"; updating product stocks for borrow_id: ${borrow_id}`);
+
+                const borrowDetails = await transactionPrisma.borrowdetail.findMany({
+                    where: { borrow_id: parseInt(borrow_id) },
+                });
+
+                for (const detail of borrowDetails) {
+                    console.log(`Increasing stock for product_id: ${detail.product_id} by amount: ${detail.amount}`);
+
+                    await transactionPrisma.products.update({
+                        where: { product_id: detail.product_id },
+                        data: { stock: { increment: detail.amount } },
+                    });
+                }
+            }
+
+            return updatedBorrow;
         });
 
-        res.status(200).json({ message: 'Borrow status updated successfully.', updatedBorrow });
+        res.status(200).json({ message: 'Borrow status updated successfully.', result });
     } catch (err) {
+        // Enhanced error handling for debugging
         console.error('Failed to update borrow status:', err.message);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Borrow record not found' });
+        if (err.meta && err.meta.cause) {
+            console.error('Error cause:', err.meta.cause);
         }
-        res.status(500).json({ error: 'Failed to update borrow status' });
+        console.error('Full error:', err); // Log full error for troubleshooting
+
+        res.status(500).json({ error: 'Failed to update borrow status', details: err.message });
     }
 };
 
+// Controller function to get borrow by ID
+const getBorrowById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const borrow = await prisma.borrow.findUnique({
+            where: { borrow_id: parseInt(id) },
+            include: { borrowdetails: { include: { product: true } } }
+        });
+        if (!borrow) {
+            return res.status(404).json({ error: 'Borrow record not found' });
+        }
+        res.status(200).json(borrow);
+    } catch (error) {
+        console.error('Failed to retrieve borrow:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve borrow' });
+    }
+};
 
-
-
-module.exports = { createBorrow, getBorrow, updateBorrowStatus };
+module.exports = { createBorrow, getBorrow, updateBorrowStatus, getBorrowById };
