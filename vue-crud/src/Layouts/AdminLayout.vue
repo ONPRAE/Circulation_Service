@@ -78,6 +78,17 @@
           </q-item-section>
           <q-item-section style="color: black;">รายงานการยืม-คืน</q-item-section>
         </q-item>
+               <!-- Profile Section -->
+       <q-separator spaced />
+        <div style="padding-left: 24px; font-weight: bold; color: black;">Profile</div>
+
+        <!-- Profile link with dynamic user ID -->
+        <q-item clickable v-ripple :to="`/profile/${userId}`" style="padding-left: 16px;">
+          <q-item-section avatar>
+            <q-icon name="account_circle" color="black"></q-icon>
+          </q-item-section>
+          <q-item-section style="color: black;">ข้อมูลส่วนตัว</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 

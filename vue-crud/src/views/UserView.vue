@@ -130,7 +130,7 @@ const filteredProductRows = computed(() => {
     // เงื่อนไขการค้นหาตามประเภท
     const matchesType = selectedType.value ? product.product_type === selectedType.value : true;
     // เงื่อนไขการค้นหาตามสถานะ
-    const matchesStatus = selectedStatus.value === 'Available' ? product.stock > 0 : product.stock === 0;
+    const matchesStatus = selectedStatus.value === 'Available' ? product.stock > 0 : product.stock <= 0;
     // เงื่อนไขการค้นหาตามคำค้นหา
     const matchesQuery = product.product_name.toLowerCase().includes(searchQuery.value.toLowerCase());
     return matchesType && matchesStatus && matchesQuery;

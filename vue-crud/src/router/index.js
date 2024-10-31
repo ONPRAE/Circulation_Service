@@ -39,7 +39,8 @@ const router = createRouter({
       ]
     },
     {
-      path: '/profile',
+      path: '/profile/:id',
+      name:'profile',
       component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
       children: [
         { path: '', component: () => import('../views/ProfileView.vue') } // หน้า CreateProduct

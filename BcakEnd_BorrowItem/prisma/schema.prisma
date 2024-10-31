@@ -14,6 +14,9 @@ model borrow {
   borrow_return DateTime?      @db.DateTime(0)
   status        borrow_status?
 
+  // เชื่อมต่อกับ borrowdetails
+  borrowdetails borrowdetail[]  // ความสัมพันธ์แบบหนึ่งต่อหลาย
+
   @@index([user_id], map: "users_ibfk_1")
 }
 
@@ -21,6 +24,12 @@ model borrowdetail {
   borrow_id  Int
   product_id Int
   amount     Int
+
+  // เชื่อมต่อกับ borrow
+  borrow     borrow    @relation(fields: [borrow_id], references: [borrow_id])
+  
+  // เชื่อมต่อกับ products
+  product    products   @relation(fields: [product_id], references: [product_id])
 
   @@id([borrow_id, product_id])
   @@index([product_id], map: "product_id")
@@ -32,6 +41,9 @@ model products {
   product_type products_product_type?
   stock        Int?
   image        String?                @db.VarChar(255)
+
+  // เชื่อมต่อกับ borrowdetail
+  borrowdetails borrowdetail[]        // ความสัมพันธ์แบบหนึ่งต่อหลาย
 }
 
 model user {

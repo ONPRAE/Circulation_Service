@@ -1,6 +1,5 @@
 const { PrismaClient, user_role } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-
 const prisma = new PrismaClient();
 const hashPassword = async (password) => {
     const saltRounds = 10;
@@ -158,5 +157,26 @@ const getUserRole = async (req, res) => {
     }
 };
 
-module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole };
+// Get user by ID
+const getUserById = async (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    
+    try {
+        const user = await prisma.user.findUnique({
+            where: { user_id: userId }, // Ensure `user_id` matches schema
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ error: 'Error fetching user' });
+    }
+};
+
+
+module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole,getUserById };
 
