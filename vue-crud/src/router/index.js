@@ -34,6 +34,13 @@ const router = createRouter({
       ]
     },
     {
+      path: '/forgot',
+      component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
+      children: [
+        { path: '', component: () => import('../views/ChangePasswordView.vue') }
+      ]
+    },
+    {
       path: '/about',
       component: () => import('../Layouts/NoDrawerLayout.vue'), // ใช้ DrawerLayout
       children: [

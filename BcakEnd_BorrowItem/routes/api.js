@@ -27,6 +27,8 @@ router.get('/users', userController.getUser);
 router.post('/login', userController.login);
 router.get('/user/role', userController.getUserRole);
 router.post('/logout', userController.logout);
+router.put('/users', userController.updatePassword);
+router.put('/users/:user_id', userController.updatePasswordByID);
 
 
 

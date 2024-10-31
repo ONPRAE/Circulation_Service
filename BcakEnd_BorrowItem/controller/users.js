@@ -136,42 +136,30 @@ const login = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-// Example in users.js
-const getUserRole = async (req, res) => {
-    const { userId } = req.query; // Get user ID from query parameter
 
+const getUserRole = async (req, res) => {
+    const userId = parseInt(req.query.userId, 10);
+  
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+  
     try {
-      // Ensure userId is present and parsed as an integer
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
-      
-      const parsedUserId = parseInt(userId, 10);
-      
-      if (isNaN(parsedUserId)) {
-        return res.status(400).json({ error: "User ID must be a valid integer" });
-      }
-    
       const user = await prisma.user.findUnique({
-        where: {
-          user_id: parsedUserId, // Use parsed integer userId
-        },
-        select: {
-          role: true,
-        },
+        where: { user_id: userId },
+        select: { role: true },
       });
-    
+  
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-    
-      res.json({ role: user.role });
+  
+      res.status(200).json({ role: user.role });
     } catch (error) {
       console.error("Error fetching user role:", error);
       res.status(500).json({ error: "Internal server error" });
     }
-
-};
+  };
 
 // Get user by ID
 const getUserById = async (req, res) => {
@@ -204,6 +192,72 @@ const logout = async (req, res) => {
     }
 };
 
+const updatePassword = async (req, res) => {
+    const { email, newPassword } = req.body;
 
-module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole,getUserById, logout };
+    // Ensure both email and newPassword are provided
+    if (!email || !newPassword) {
+        return res.status(400).json({ error: "Email and new password are required" });
+    }
+
+    try {
+        // Check if user exists by email
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Hash the new password
+        const hashedPassword = await hashPassword(newPassword);
+
+        // Update the user's password
+        await prisma.user.update({
+            where: { email },
+            data: { password: hashedPassword }
+        });
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ error: "Failed to update password" });
+    }
+};
+
+
+// Update password by user ID
+const updatePasswordByID = async (req, res) => {
+    const { newPassword } = req.body;
+    const userId = parseInt(req.params.user_id, 10);
+
+    // Ensure newPassword is provided
+    if (!newPassword) {
+        return res.status(400).json({ error: "New password is required" });
+    }
+
+    try {
+        // Hash the new password
+        const hashedPassword = await hashPassword(newPassword);
+
+        // Update the user's password
+        await prisma.user.update({
+            where: { user_id: userId },
+            data: { password: hashedPassword }
+        });
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ error: "Failed to update password" });
+    }
+};
+
+
+module.exports = { getUser, createUser, deleteUser, getUsersByName, login, getUserRole, getUserById, logout, updatePassword,updatePasswordByID };
+
+
+
+
 

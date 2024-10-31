@@ -1,9 +1,11 @@
 <template>
   <div class="q-pa-md">
+    <!-- Add Product Button -->
     <div class="q-py-md">
       <q-btn icon="add" @click="openAddProductDialog" label="Add Product" />
     </div>
 
+    <!-- Product Table -->
     <q-table
       title="Products"
       :rows="productRows"
@@ -30,22 +32,14 @@
             <label for="product_name">Product Name:</label>
             <q-input v-model="product_name" id="product_name" required />
           </div>
-
           <div class="form-group">
             <label for="stock">Stock:</label>
             <q-input v-model="stock" type="number" id="stock" required min="1" />
           </div>
-
           <div class="form-group">
             <label for="product_type">Type:</label>
-            <q-select 
-              v-model="product_type" 
-              id="product_type" 
-              :options="product_types" 
-              required 
-            />
+            <q-select v-model="product_type" id="product_type" :options="product_types" required />
           </div>
-
           <div class="form-group">
             <label for="image">Image:</label>
             <input type="file" @change="onFileChange" accept="image/jpeg, image/png, image/gif" required />
@@ -74,22 +68,18 @@
             <label for="product_id">Product ID:</label>
             <q-input v-model="currentProductId" id="product_id" readonly />
           </div>
-
           <div class="form-group">
             <label for="product_name">Product Name:</label>
             <q-input v-model="product_name" id="product_name" required />
           </div>
-
           <div class="form-group">
             <label for="stock">Stock:</label>
             <q-input v-model="stock" type="number" id="stock" required min="1" />
           </div>
-
           <div class="form-group">
             <label for="image">Image:</label>
             <input type="file" @change="onEditFileChange" accept="image/jpeg, image/png, image/gif" />
           </div>
-          
 
           <div v-if="editerrorMessage" class="error">{{ editerrorMessage }}</div>
           <div v-if="editsuccessMessage" class="success">{{ editsuccessMessage }}</div>
@@ -105,58 +95,58 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+
+const router = useRouter();
 
 // Define columns for the product table
 const productColumns = ref([
-  { name: 'product_id', align: 'center', label: 'Product ID', field: 'product_id', sortable: true },
-  { name: 'product_name', align: 'left', label: 'Product Name', field: 'product_name', sortable: true },
-  { name: 'product_type', align: 'right', label: 'Type', field: 'product_type', sortable: true },
-  { name: 'stock', align: 'right', label: 'Stock', field: 'stock', sortable: true },
-  { name: 'image', align: 'center', label: 'Image', field: 'image', sortable: true },
-  { name: 'actions', align: 'center', label: 'Actions', field: 'actions', sortable: false },
+  { name: "product_id", align: "center", label: "Product ID", field: "product_id", sortable: true },
+  { name: "product_name", align: "left", label: "Product Name", field: "product_name", sortable: true },
+  { name: "product_type", align: "right", label: "Type", field: "product_type", sortable: true },
+  { name: "stock", align: "right", label: "Stock", field: "stock", sortable: true },
+  { name: "image", align: "center", label: "Image", field: "image", sortable: true },
+  { name: "actions", align: "center", label: "Actions", field: "actions", sortable: false },
 ]);
 
 const productRows = ref([]);
 
 // Fetch products from the backend
 const fetchProducts = () => {
-  fetch('http://localhost:8800/api/v1/products')
-    .then(res => res.json())
-    .then(result => {
-      productRows.value = result;
+  axios.get("http://localhost:8800/api/v1/products")
+    .then(response => {
+      productRows.value = response.data;
     })
-    .catch(error => console.error('Error fetching products:', error));
+    .catch(error => console.error("Error fetching products:", error));
 };
 fetchProducts();
 
 // Dialog state and form data for adding and editing
-const product_types = ref([
-'ToolKids', 'Projector', 'Mouse', 'Laptop', 'Keyboard', 'Speaker', 'Monitor'
-]);
+const product_types = ref(["ToolKids", "Projector", "Mouse", "Laptop", "Keyboard", "Speaker", "Monitor"]);
 const addProductDialog = ref(false);
 const editProductDialog = ref(false);
-const product_name = ref('');
-const product_type = ref('');
+const product_name = ref("");
+const product_type = ref("");
 const stock = ref(null);
 const image = ref(null);
 
-const errorMessage = ref('');
-const successMessage = ref('');
-const editerrorMessage = ref('');
-const editsuccessMessage = ref('');
+const errorMessage = ref("");
+const successMessage = ref("");
+const editerrorMessage = ref("");
+const editsuccessMessage = ref("");
 
 const currentProductId = ref(null); // Stores the ID of the product being edited
 
 // Open the add product dialog
 const openAddProductDialog = () => {
-  product_name.value = '';
-  product_type.value = '';
+  product_name.value = "";
+  product_type.value = "";
   stock.value = null;
   image.value = null;
-  errorMessage.value = '';
-  successMessage.value = '';
+  errorMessage.value = "";
+  successMessage.value = "";
   addProductDialog.value = true;
 };
 
@@ -170,14 +160,14 @@ const onEditProduct = async (product_id) => {
     product_type.value = product.product_type;
     stock.value = product.stock;
     image.value = null;
-    
+
     currentProductId.value = product_id; // Set currentProductId for editing
-    editerrorMessage.value = '';
-    editsuccessMessage.value = '';
+    editerrorMessage.value = "";
+    editsuccessMessage.value = "";
     editProductDialog.value = true; // Open edit dialog
   } catch (error) {
-    console.error('Error fetching product:', error);
-    editerrorMessage.value = 'Failed to fetch product data.';
+    console.error("Error fetching product:", error);
+    editerrorMessage.value = "Failed to fetch product data.";
   }
 };
 
@@ -199,109 +189,98 @@ const closeEditProductDialog = () => {
 
 // Submit form for adding a new product
 const submitForm = async () => {
-  errorMessage.value = '';
-  successMessage.value = '';
-
   if (!product_name.value || !stock.value || !image.value || !product_type.value) {
-    errorMessage.value = 'All fields are required.';
+    errorMessage.value = "All fields are required.";
     return;
   }
 
   const formData = new FormData();
-  formData.append('product_name', product_name.value);
-  formData.append('product_type', product_type.value);
-  formData.append('stock', parseInt(stock.value));
-  formData.append('image', image.value);
+  formData.append("product_name", product_name.value);
+  formData.append("product_type", product_type.value);
+  formData.append("stock", parseInt(stock.value));
+  formData.append("image", image.value);
 
   try {
-    const response = await axios.post('http://localhost:8800/api/v1/products', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    const response = await axios.post("http://localhost:8800/api/v1/products", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     successMessage.value = response.data.message;
     fetchProducts(); // Refresh product data
     closeAddProductDialog(); // Close the dialog
   } catch (error) {
-    if (error.response && error.response.data) {
-      errorMessage.value = error.response.data.message || 'Failed to create product.';
-    } else {
-      errorMessage.value = 'An unexpected error occurred.';
-    }
+    errorMessage.value = error.response?.data.message || "Failed to create product.";
   }
 };
 
 // Submit form for editing an existing product
 const submitEditForm = async (product_id) => {
-  editerrorMessage.value = '';
-  editsuccessMessage.value = '';
-
   if (!product_name.value || !stock.value) {
-    editerrorMessage.value = 'Product name and stock are required.';
+    editerrorMessage.value = "Product name and stock are required.";
     return;
   }
 
-  const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
-
-  const raw = JSON.stringify({
+  const updatedData = {
     product_name: product_name.value,
     stock: parseInt(stock.value, 10),
     product_type: product_type.value,
-    // Handle image upload and get the URL if necessary
-    image: image.value ? await uploadImage(image.value) : null // Optional image upload function
-  });
-
-  const requestOptions = {
-    method: "PUT",
-    headers: myHeaders,
-    body: raw,
-    redirect: "follow"
   };
 
-  try {
-    const response = await fetch(`http://localhost:8800/api/v1/products/${product_id}`, requestOptions);
-    const result = await response.json();
+  if (image.value) {
+    updatedData.image = await uploadImage(image.value);
+  }
 
-    if (response.ok) {
-      alert('Update Success'); // Success alert
-      editsuccessMessage.value = result.message;
-      fetchProducts(); // Refresh product data
-      closeEditProductDialog(); // Close the dialog
-    } else {
-      editerrorMessage.value = result.message || 'Failed to edit product.';
-    }
+  try {
+    const response = await axios.put(`http://localhost:8800/api/v1/products/${product_id}`, updatedData);
+    editsuccessMessage.value = response.data.message;
+    fetchProducts(); // Refresh product data
+    closeEditProductDialog(); // Close the dialog
   } catch (error) {
-    console.error('Error updating product:', error);
-    editerrorMessage.value = 'An unexpected error occurred.';
+    editerrorMessage.value = error.response?.data.message || "Failed to edit product.";
   }
 };
 
 // Function to upload the image and return the URL
 const uploadImage = async (imageFile) => {
   const formData = new FormData();
-  formData.append('image', imageFile);
+  formData.append("image", imageFile);
 
-  const response = await fetch('http://localhost:8800/api/v1/upload', { // Adjust according to your upload endpoint
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  return result.imageUrl; // Return the uploaded image URL
+  const response = await axios.post("http://localhost:8800/api/v1/upload", formData);
+  return response.data.imageUrl; // Return the uploaded image URL
 };
 
 // Delete a product
 const onDeleteProduct = (id) => {
   if (confirm("Are you sure you want to delete this product?")) {
-    fetch(`http://localhost:8800/api/v1/products/${id}`, { method: 'DELETE' })
-      .then(response => response.json())
-      .then(result => {
-        alert(result.message);
+    axios.delete(`http://localhost:8800/api/v1/products/${id}`)
+      .then(response => {
+        alert(response.data.message);
         fetchProducts(); // Refresh product data
       })
-      .catch(error => console.error('Error deleting product:', error));
+      .catch(error => console.error("Error deleting product:", error));
   }
 };
 
+// Check User Role and Redirect if Necessary
+const checkUserRole = async () => {
+  const userId = localStorage.getItem("user_id");
+
+  if (userId) {
+    try {
+      const response = await axios.get(`http://localhost:8800/api/v1/user/role?userId=${userId}`);
+      if (response.data.role === "User") {
+        router.push("/user");
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  } else {
+    console.error("User ID is missing.");
+  }
+};
+
+onMounted(() => {
+  checkUserRole();
+});
 </script>
 
 <style scoped>

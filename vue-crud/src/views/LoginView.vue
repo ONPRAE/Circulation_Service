@@ -37,6 +37,15 @@
             class="full-width"
             @click="goToSignUp"
           />
+
+          <!-- Forgot Password link -->
+          <q-btn
+            label="Forgot Password?"
+            flat
+            color="primary"
+            class="full-width text-caption q-mt-sm"
+            @click="goToForgotPassword"
+          />
         </q-form>
       </q-card-section>
     </q-card>
@@ -57,45 +66,46 @@ export default {
     async onSubmit() {
       if (this.email && this.password) {
         try {
-          // เรียก API สำหรับล็อกอิน
+          // API call for login
           const response = await axios.post('http://localhost:8800/api/v1/login', {
             email: this.email,
             password: this.password,
           });
 
-          // ตรวจสอบสถานะการตอบกลับ
           if (response.status === 200) {
-            const user = response.data.user; // สมมติว่า user object อยู่ใน response.data.user
+            const user = response.data.user;
             
-            // เก็บ user_id และ user_role ใน Local Storage
+            // Store user_id and user_role in Local Storage
             localStorage.setItem('user_id', user.user_id);
             localStorage.setItem('user_role', user.role);
 
-            // นำทางตามบทบาทของผู้ใช้
+            // Navigate based on user role
             if (user.role === 'Admin') {
               this.$router.push('/home');
             } else if (user.role === 'User') {
               this.$router.push('/user');
             } else {
-              alert('บทบาทไม่เป็นที่รู้จัก โปรดติดต่อผู้ดูแลระบบ');
+              alert('Unknown role. Please contact the administrator.');
             }
           } else {
-            alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่');
+            alert('Login error, please try again.');
           }
         } catch (error) {
-          // จัดการข้อผิดพลาด เช่น รหัสผ่านไม่ถูกต้องหรือข้อผิดพลาดของเซิร์ฟเวอร์
           if (error.response && error.response.data) {
-            alert(error.response.data.message || 'การเข้าสู่ระบบล้มเหลว กรุณาตรวจสอบข้อมูลอีกครั้ง');
+            alert(error.response.data.message || 'Login failed, please check your details.');
           } else {
-            alert('เกิดข้อผิดพลาดทางเครือข่าย กรุณาลองใหม่ภายหลัง');
+            alert('Network error, please try again later.');
           }
         }
       } else {
-        alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+        alert('Please fill in all fields.');
       }
     },
     goToSignUp() {
-      this.$router.push('/signup'); // พาผู้ใช้ไปที่หน้า signup
+      this.$router.push('/signup'); // Redirect to signup page
+    },
+    goToForgotPassword() {
+      this.$router.push('/forgot'); // Redirect to forgot password page
     },
   },
 };

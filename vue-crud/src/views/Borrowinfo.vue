@@ -1,11 +1,12 @@
 <template>
   <div class="q-pa-md">
+    <!-- Borrow Records Table -->
     <q-table
       title="Borrow Records"
       :rows="borrowRows"
       :columns="borrowColumns"
       row-key="borrow_id"
-      loading="isLoading"
+      :loading="isLoading"
       no-data-label="No records found"
     >
       <template v-slot:body-cell-actions="props">
@@ -47,8 +48,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+
+const router = useRouter();
 
 // Define columns for the borrow table
 const borrowColumns = ref([
@@ -76,8 +80,8 @@ const fetchBorrows = async () => {
     isLoading.value = false;
   }
 };
-fetchBorrows();
 
+// Dialog state and form data for editing
 const editBorrowDialog = ref(false);
 const status = ref('');
 const errorMessage = ref('');
@@ -125,11 +129,11 @@ const submitEditForm = async (borrow_id) => {
     const response = await axios.put(`http://localhost:8800/api/v1/borrows/${borrow_id}`, formData);
     successMessage.value = response.data.message;
 
-    // If the status was changed to "Return", fetch the updated borrows data
+    // Refresh data if status was changed to "Return"
     if (status.value === 'Return') {
       await fetchBorrows();
     }
-    
+
     closeEditBorrowDialog();
   } catch (error) {
     console.error('Error updating borrow status:', error.response?.data || error.message);
@@ -139,6 +143,28 @@ const submitEditForm = async (borrow_id) => {
   }
 };
 
+// Check User Role and Redirect if Necessary
+const checkUserRole = async () => {
+  const userId = localStorage.getItem("user_id");
+
+  if (userId) {
+    try {
+      const response = await axios.get(`http://localhost:8800/api/v1/user/role?userId=${userId}`);
+      if (response.data.role === "User") {
+        router.push("/user");
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  } else {
+    console.error("User ID is missing.");
+  }
+};
+
+onMounted(() => {
+  checkUserRole();
+  fetchBorrows(); // Fetch data when the component is mounted
+});
 </script>
 
 <style scoped>

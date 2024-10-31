@@ -52,18 +52,7 @@
           </q-item-section>
           <q-item-section style="color: black;">ยืมอุปกรณ์</q-item-section>
         </q-item>
-
-        <!-- ข้อมูลประวัติย้อนหลัง -->
-        <q-separator spaced />
-        <div style="padding-left: 24px; font-weight: bold; color: black;">ข้อมูลประวัติย้อนหลัง</div>
-        <q-item clickable v-ripple to="/history" style="padding-left: 16px;">
-          <q-item-section avatar>
-            <q-icon name="history" color="black"></q-icon>
-          </q-item-section>
-          <q-item-section style="color: black;">ประวัติทั้งหมด</q-item-section>
-        </q-item>
-
-        <!-- รายงาน -->
+       <!-- รายงาน -->
         <q-separator spaced />
         <div style="padding-left: 24px; font-weight: bold; color: black;">รายงาน</div>
         <q-item clickable v-ripple to="/prodreport" style="padding-left: 16px;">
